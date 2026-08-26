@@ -20,7 +20,7 @@ workflows:
           xcode-project use-profiles
       - name: Build ipa for distribution
         script: |
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist -t lib/main.dart
+          flutter build ipa --release -t lib/main.dart
     publishing:
       app_store_connect:
         auth: integration
