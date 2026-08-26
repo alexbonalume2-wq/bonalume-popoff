@@ -2,7 +2,7 @@ name: bonalume_popoff
 description: "App per la gestione della centralina Bonalume."
 publish_to: 'none'
 
-version: 1.50.0+250
+version: 1.6.0+251
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
