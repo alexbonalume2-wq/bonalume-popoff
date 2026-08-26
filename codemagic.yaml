@@ -11,8 +11,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.bonalume.popoff
-        profile_name: prod_profile
-        certificate_name: apple_dist_cert
     scripts:
       - name: Get Flutter packages
         script: |
