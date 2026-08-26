@@ -1,7 +1,7 @@
 workflows:
   default-workflow:
     name: Default Workflow
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     environment:
       vars:
         BUNDLE_ID: "com.bonalume.popoff"
@@ -12,7 +12,7 @@ workflows:
           flutter packages pub get
       - name: Build ipa for distribution
         script: |
-          flutter build ipa --release --flavor ios-production -t lib/main_prod.dart
+          flutter build ipa --release --flavor ios-production -t lib/main.dart
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
