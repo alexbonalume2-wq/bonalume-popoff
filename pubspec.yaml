@@ -1,4 +1,4 @@
-name: bonalume_app
+name: com.bonalume.popoff
 description: "App per la gestione della centralina Bonalume."
 publish_to: 'none'
 
