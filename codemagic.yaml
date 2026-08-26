@@ -6,6 +6,7 @@ workflows:
       vars:
         BUNDLE_ID: "com.bonalume.popoff"
       xcode: latest
+      signing_style: automatic
     scripts:
       - name: Get Flutter packages
         script: |
