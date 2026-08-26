@@ -14,7 +14,7 @@ workflows:
     scripts:
       - name: Set up code signing settings
         script: |
-          app-store-connect fetch-signing-files "com.bonalume.popoff" --type ios_app_store --create
+          app-store-connect fetch-signing-files "com.bonalume.popoff" --type IOS_APP_STORE --create
       - name: Get Flutter packages
         script: |
           flutter packages pub get
