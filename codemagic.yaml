@@ -21,6 +21,8 @@ workflows:
       - name: Build ipa for distribution
         script: |
           flutter build ipa --release -t lib/main.dart
+    artifacts:
+      - build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
