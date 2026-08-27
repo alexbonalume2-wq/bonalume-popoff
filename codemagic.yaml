@@ -1,0 +1,29 @@
+workflows:
+  default-workflow:
+    name: Default Workflow
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: bonalumekey
+    environment:
+      vars:
+        BUNDLE_ID: "com.bonalume.popoff"
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.bonalume.popoff
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Set up signing settings
+        script: |
+          xcode-project use-profiles
+      - name: Build ipa for distribution
+        script: |
+          flutter build ipa --release --export-options-plist=$HOME/export_options.plist -t lib/main.dart
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
