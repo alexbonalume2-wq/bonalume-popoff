@@ -45,5 +45,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+    <string>L'app utilizza il Bluetooth per connettersi e gestire la centralina Bonalume.</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>L'app necessita del Bluetooth per comunicare in modo sicuro con i dispositivi Bonalume.</string>
 </dict>
 </plist>
