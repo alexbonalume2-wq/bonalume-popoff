@@ -633,21 +633,45 @@ class ScreenPannello extends StatefulWidget {
 class _ScreenPannelloState extends State<ScreenPannello> {
   bool isAttivo = false;
   int freq = 10;
-  String statoArduino = "";
   bool isItaliano = true;
 
   @override
   void initState() {
     super.initState();
     _caricaLingua();
+    _aggiornaDatiAutomaticamente(); // Chiama la centralina appena si apre la pagina
   }
 
   Future<void> _caricaLingua() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       isItaliano = prefs.getBool('is_italiano') ?? true;
-      statoArduino = t("Non aggiornato", "Not updated");
     });
+  }
+  // FUNZIONE AUTOMATICA: Sostituisce il vecchio tasto "Aggiorna"
+  Future<void> _aggiornaDatiAutomaticamente() async {
+    if (GestioneBluetooth.connectedDeviceId == null) return; // Evita errori se non connesso
+    
+    print("🔥🔥🔥 LETTURA AUTOMATICA FREQUENZA! 🔥🔥🔥");
+    await GestioneBluetooth.sendCommand("X_F");
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    String risposta = "";
+    try {
+      risposta = await GestioneBluetooth.readData();
+    } catch (e) {
+      risposta = "";
+    }
+
+    String soloNumeri = risposta.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (mounted) {
+      setState(() {
+        if (soloNumeri.isNotEmpty) {
+          freq = int.parse(soloNumeri);
+        }
+      });
+    }
   }
 
   String t(String it, String en) {
@@ -665,17 +689,17 @@ class _ScreenPannelloState extends State<ScreenPannello> {
             // 1. LOGO IN CIMA A TUTTA LARGHEZZA
             GestureDetector(
               onTap: () async {
-  // Sceglie il link in base alla lingua impostata nell'app
-  final String linkScelto = t(
-    'https://www.bonalume.com/auto/abarth/', // Link in ITALIANO
-    'https://www.bonalume.com/en/car/abarth/' // Link in INGLESE (modifica questo con il percorso esatto!)
-  );
-  final Uri url = Uri.parse(linkScelto);
-  await launchUrl(
-    url,
-    mode: LaunchMode.externalApplication,
-  );
-},
+                // Sceglie il link in base alla lingua impostata nell'app
+                final String linkScelto = t(
+                  'https://www.bonalume.com/auto/abarth/', // Link in ITALIANO
+                  'https://www.bonalume.com/en/car/abarth/' // Link in INGLESE
+                );
+                final Uri url = Uri.parse(linkScelto);
+                await launchUrl(
+                  url,
+                  mode: LaunchMode.externalApplication,
+                );
+              },
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -707,64 +731,19 @@ class _ScreenPannelloState extends State<ScreenPannello> {
 
                     // TITOLO PANNELLO
                     Text(
-                      t('Pannello Principale', 'Main Panel'),
+                      t('Colpi Valvola ', 'Valve Strokes'),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     const SizedBox(height: 12),
 
-                    // TASTO AGGIORNA DATI
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                      ),
-                      onPressed: () async {
-                        print("🔥🔥🔥 HO PREMUTO IL TASTO AGGIORNA FREQUENZA! 🔥🔥🔥");
-                        
-                        await GestioneBluetooth.sendCommand("X_F");
-                        await Future.delayed(const Duration(milliseconds: 500));
-                        
-                        String risposta = "";
-                        try {
-                          risposta = await GestioneBluetooth.readData();
-                        } catch (e) {
-                          risposta = "";
-                        }
-
-                        String soloNumeri = risposta.replaceAll(RegExp(r'[^0-9]'), '');
-
-                        setState(() {
-                          if (soloNumeri.isNotEmpty) {
-                            freq = int.parse(soloNumeri);
-                            statoArduino = t("Aggiornato: $freq", "Updated: $freq");
-                          } else {
-                            statoArduino = risposta.isNotEmpty ? risposta : t("Valore corrente: $freq", "Current value: $freq");
-                          }
-                        });
-                      },
-                      child: Text(
-                        t('Aggiorna Dati Salvati', 'Update Saved Data'), 
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    
-                    Text(
-                      '${t("Dati da Arduino", "Data from Arduino")}: $statoArduino',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    const SizedBox(height: 14),
-
+                    // LABEL FREQUENZA ORA IN CIMA AL POSTO DEL BOTTONE
                     Text(
                       '${t("Frequenza colpi attuali", "Current stroke frequency")}: $freq',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFE30022)),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE30022)),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                     // PULSANTI - E + (Sopra lo STUTUTU)
                     Row(
@@ -925,8 +904,7 @@ class _ScreenPannelloState extends State<ScreenPannello> {
     );
   }
 }
-  @override
- // 3. SCHERMATA ATTUATORE
+  // 3. SCHERMATA ATTUATORE
 class ScreenAttuatore extends StatefulWidget {
   const ScreenAttuatore({super.key});
 
@@ -943,6 +921,7 @@ class _ScreenAttuatoreState extends State<ScreenAttuatore> {
   void initState() {
     super.initState();
     _caricaLingua();
+    _aggiornaDatiAutomaticamente(); // Lettura automatica all'avvio della pagina
   }
 
   Future<void> _caricaLingua() async {
@@ -950,6 +929,20 @@ class _ScreenAttuatoreState extends State<ScreenAttuatore> {
     setState(() {
       isItaliano = prefs.getBool('is_italiano') ?? true;
     });
+  }
+
+  // NUOVA FUNZIONE: Aggiorna automaticamente la posizione
+  Future<void> _aggiornaDatiAutomaticamente() async {
+    if (GestioneBluetooth.connectedDeviceId == null) return;
+    
+    // Per ora mantengo la logica di test che avevi nel pulsante originale.
+    // SE devi interrogare il bluetooth per la posizione, sostituisci questo blocco
+    // con il comando corretto (es: GestioneBluetooth.sendCommand("GET_POS")).
+    if (mounted) {
+      setState(() {
+        pos = 10; 
+      });
+    }
   }
 
   String t(String it, String en) {
@@ -967,17 +960,17 @@ class _ScreenAttuatoreState extends State<ScreenAttuatore> {
             // 1. LOGO IN CIMA A TUTTA LARGHEZZA
             GestureDetector(
               onTap: () async {
-  // Sceglie il link in base alla lingua impostata nell'app
-  final String linkScelto = t(
-    'https://www.bonalume.com/auto/abarth/', // Link in ITALIANO
-    'https://www.bonalume.com/en/car/abarth/' // Link in INGLESE (modifica questo con il percorso esatto!)
-  );
-  final Uri url = Uri.parse(linkScelto);
-  await launchUrl(
-    url,
-    mode: LaunchMode.externalApplication,
-  );
-},
+                // Sceglie il link in base alla lingua impostata nell'app
+                final String linkScelto = t(
+                  'https://www.bonalume.com/auto/abarth/', // Link in ITALIANO
+                  'https://www.bonalume.com/en/car/abarth/' // Link in INGLESE
+                );
+                final Uri url = Uri.parse(linkScelto);
+                await launchUrl(
+                  url,
+                  mode: LaunchMode.externalApplication,
+                );
+              },
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -1015,31 +1008,13 @@ class _ScreenAttuatoreState extends State<ScreenAttuatore> {
                     ),
                     const SizedBox(height: 12),
                     
-                    // TASTO AGGIORNA DATI
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                      ),
-                      onPressed: () async {
-                      setState(() {
-                      pos = 10;
-                      });
-                    },
-                      child: Text(
-                        t('Aggiorna Dati Salvati', 'Update Saved Data'),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    // LABEL POSIZIONE ORA IN CIMA AL POSTO DEL BOTTONE
                     Text(
                       '${t("Posizione", "Position")}: $pos', 
                       textAlign: TextAlign.center, 
                       style: const TextStyle(fontSize: 20, color: Color(0xFFE30022), fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     
                     // RIGA TOTAL SILENT (NERO) / TOTAL NOISY (ROSSO)
                     Row(
@@ -1162,7 +1137,7 @@ class _ScreenAttuatoreState extends State<ScreenAttuatore> {
                         Navigator.pop(context);
                       }, 
                       child: Text(
-                        t('Torna a Pannello Principale', 'Back to Main Panel'), 
+                        t('Torna a Colpi Valvola', 'Back to Valve Strokes'), 
                         style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),

@@ -2,7 +2,7 @@ name: bonalume_popoff
 description: "App per la gestione della centralina Bonalume."
 publish_to: 'none'
 
-version: 112.6.0+252
+version: 129.6.0+268
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -25,3 +25,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo_bonalume.png
+flutter_launcher_icons:
+  android: true 
+  ios: true
+  image_path: "assets/images/Bonalume2.png"
